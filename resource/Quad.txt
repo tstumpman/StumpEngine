@@ -1,0 +1,4 @@
+#vertices
+(-1,-1,0),(1,1,0),(1,-1,0),(-1,1,0)
+#triangle indices, clockwise facing
+0,3,2,1,2,3
