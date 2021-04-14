@@ -1,25 +1,17 @@
 #include <iostream>
 #include <fstream>
-
+#include "drawing/DxPainter.h"
+#include "drawing/Pixel.h"
+#include <Windows.h>
 using namespace std;
 
-int main()
+int CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
-	cout << "Hello World" << endl;
-
-	ifstream myFile;
-	myFile.open("resource/HelloWorldtest", ifstream::in);
-	if (myFile.is_open()) {
-		myFile.seekg(0, ios::end);
-		int size = myFile.tellg();
-		myFile.seekg(0, ios::beg);
-		cout << "this file is " << size << " bytes long" << endl;
-		char *sz  = new char[size+1];
-		sz[size] = '\0';
-		myFile.read(sz, size);
-		cout << "Contents" << endl;
-		myFile.close();
-		cout << sz << endl;
-	}
+	DxPainter* painter = new DxPainter(hInstance, 100, 100);
+	auto result = painter->getCoreWindow();
+	//painter->instantiate();
+	//painter->draw2d();
+	clog << result;
+	system("pause");
 	return 0;
 }
