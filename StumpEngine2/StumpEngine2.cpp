@@ -1,6 +1,7 @@
 // StumpEngine2.cpp : Defines the entry point for the application.
 //
 
+#include "../source/drawing/DxPainter.h"
 #include "framework.h"
 #include "StumpEngine2.h"
 
@@ -8,6 +9,7 @@
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
+HWND	hWnd;									//current window
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
@@ -17,7 +19,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+int APIENTRY wWinMain(
+	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
 	_In_ int       nCmdShow)
@@ -26,7 +29,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// TODO: Place code here.
-
+	// 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDC_STUMPENGINE2, szWindowClass, MAX_LOADSTRING);
@@ -37,25 +40,42 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		return FALSE;
 	}
+	DxPainter painter = DxPainter(hWnd, 100, 100);
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STUMPENGINE2));
 
-	MSG msg;
+	MSG  msg;
+	bool bGotMsg;
+	msg.message = WM_NULL;
+	PeekMessage(&msg, NULL, 0U, 0U, PM_NOREMOVE);
 
-	// Main message loop:
-	while (GetMessage(&msg, nullptr, 0, 0))
+	while (WM_QUIT != msg.message)
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		// Process window events.
+		// Use PeekMessage() so we can use idle time to render the scene. 
+		bGotMsg = (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE) != 0);
+
+		if (bGotMsg)
 		{
+			// Translate and dispatch the message
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+		}
+		else
+		{
+			// Update the scene.
+			//renderer->Update();
+
+			// Render frames during idle time (when no messages are waiting).
+			//renderer->Render();
+
+			// Present the frame to the screen.
+			//deviceResources->Present();
 		}
 	}
 
 	return (int)msg.wParam;
 }
-
-
 
 //
 //  FUNCTION: MyRegisterClass()
@@ -97,7 +117,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // Store instance handle in our global variable
 
-	HWND hWnd = CreateWindowW(
+	hWnd = CreateWindowW(
 		szWindowClass,
 		szTitle,
 		WS_OVERLAPPEDWINDOW,
@@ -134,8 +154,25 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+
 	switch (message)
 	{
+	case WM_CLOSE:
+	{
+		HMENU hMenu;
+		hMenu = GetMenu(hWnd);
+		if (hMenu != NULL)
+		{
+			DestroyMenu(hMenu);
+		}
+
+		DestroyWindow(hWnd);
+		UnregisterClass(
+			szWindowClass,
+			hInst
+		);
+		return 0;
+	}
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
