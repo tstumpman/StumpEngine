@@ -6,6 +6,8 @@
 #include "StumpEngine2.h"
 
 #define MAX_LOADSTRING 100
+#define GAME_BOY_ADVANCE_WIDTH 240
+#define GAME_BOY_ADVANCE_HEIGHT 160
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -84,23 +86,28 @@ int APIENTRY wWinMain(
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-	WNDCLASSEXW wcex;
+	if (hInstance == NULL)
+		hInstance = (HINSTANCE)GetModuleHandle(NULL);
 
-	wcex.cbSize = sizeof(WNDCLASSEX);
+	HICON hIcon = NULL;
+	WCHAR szExePath[MAX_PATH];
+	GetModuleFileName(NULL, szExePath, MAX_PATH);
 
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	// Register the windows class
+	WNDCLASS wcex;
+
+	wcex.style = CS_DBLCLKS;
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_STUMPENGINE2));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
 	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_STUMPENGINE2);
 	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-	return RegisterClassExW(&wcex);
+	return RegisterClass(&wcex);
 }
 
 //
@@ -116,19 +123,30 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	hInst = hInstance; // Store instance handle in our global variable
+	int nDefaultWidth = GAME_BOY_ADVANCE_WIDTH;
+	int nDefaultHeight = GAME_BOY_ADVANCE_HEIGHT;
+	RECT rectangle;
+	SetRect(&rectangle, 0, 0, nDefaultWidth, nDefaultHeight);
+	HMENU hMenu = NULL;
 
-	hWnd = CreateWindowW(
+	AdjustWindowRect(
+		&rectangle,
+		WS_OVERLAPPEDWINDOW,
+		(hMenu != NULL) ? true : false
+	);
+
+	int x = CW_USEDEFAULT;
+	int y = CW_USEDEFAULT;
+	hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
 		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
+		x, y,
+		(rectangle.right - rectangle.left), (rectangle.bottom - rectangle.top),
 		0,
-		CW_USEDEFAULT,
-		0,
-		nullptr,
-		nullptr,
+		hMenu,
 		hInstance,
-		nullptr
+		0
 	);
 
 	if (!hWnd)

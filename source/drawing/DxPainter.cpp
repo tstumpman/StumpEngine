@@ -5,9 +5,7 @@
 #include "Canvas.h"
 
 #pragma comment(lib,"d3d11.lib")
-DxPainter::DxPainter() {
-		//No Op
-}
+
 DxPainter::DxPainter(HWND hWnd, uint screenW, uint screenH) {
 	ZeroMemory(&m_bbDesc, sizeof(D3D11_TEXTURE2D_DESC));
 	ZeroMemory(&m_bbDesc, sizeof(D3D11_TEXTURE2D_DESC));
